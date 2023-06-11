@@ -9,7 +9,7 @@ ul {
   margin: 0;
 }
 
-/* Estilos para o botÃ£o */
+/* Estilos para o botão */
 button {
   background-color: #292929;
   border: none;
@@ -48,7 +48,7 @@ table {
   background-color: #2b2b2b;
   color: white;
   border-radius: 5px;
-  text-align: center; /* centraliza o conteÃºdo das cÃ©lulas da tabela */
+  text-align: center; /* centraliza o conteúdo das células da tabela */
   font-size: 18px; /* aumenta o tamanho da fonte da tabela */
 }
 
@@ -57,13 +57,11 @@ td {
   text-align: center;
   padding: 10px;
   border: 1px solid #404040;
-  border-radius: 7px;
 }
 
 th {
   background-color: #393939;
   border-bottom: 2px solid #404040;
-  border-radius: 7px;
 }
 p {
   background-color: #f7f0f0;
@@ -75,11 +73,11 @@ tr:nth-child(even) {
 }
 
 tr:nth-child(odd) {
-  background-color: #070707;
+  background-color: #615a5a;
 }
 
-td:hover {
-  background-color: #f8f7f7;
+tr:hover {
+  background-color: #aa0d0d;
 }
 div {
   margin-top: 2px;
@@ -116,46 +114,69 @@ div {
 
   .black-row {
     background-color: black;
+    color: white;
   }
 
-  .action-buttons {
+  .grafiti-row {
+    background-color: #424242;
+    color: white;
+  }
+  .negative-value {
+    color: red;
+    font-weight: bold;
+  }
+  .danger-value {
+    color: rgb(241, 226, 3);
+    font-weight: bold;
+  }
+  .verde-value {
+    color: rgb(0, 255, 98);
+    font-weight: bold;
+  }
+  form {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
   }
 
-  .action-buttons button {
-    padding: 5px;
-    font-size: 20px;
-  }
-
-  .action-buttons button .material-icons {
-    font-size: 20px;
-  }
-
-
-
-  .chart-td {
-    text-align: center;
-    vertical-align: middle;
-  }
-
-  .chart-container {
-    text-align: center; /* Ajuste para centralizar o conteÃºdo horizontalmente */
+  label {
+    margin-right: 5px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    height: 390px; /* ou a altura desejada para o grÃ¡fico */
+    color: #faf9f9; /* Cor da fonte */
+    font-size: 15px; /* Tamanho da fonte */
   }
 
-  .label-white {
+  input[type="date"],
+  button {
+    padding: 5px;
+  }
+  .ultimo-input {
+    margin-left: 200px; /* Ajuste a margem conforme necessário */
+  }
+  .verde-valores {
+    background-color: rgb(0, 255, 76); /* Altere a cor desejada */
+    color: rgb(252, 253, 253);
+    font-weight: bold;
+  }
+
+  .danger-value {
+    color: rgb(241, 226, 3);
+    font-weight: bold;
+  }
+
+  .grafiti-row {
+    background-color: #424242;
     color: white;
   }
-  .component-spacing {
-    margin-left: 10px;
+  .text-center {
+    text-align: center;
   }
 
-
-
-
+  .chart-column,
+.chart-pie {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
