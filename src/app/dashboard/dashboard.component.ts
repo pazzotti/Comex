@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import * as Highcharts from 'highcharts';
+import { getISOWeek } from 'date-fns';
+import { ApiService } from '../services/contratos/contratos.service';
 
 @Component({
   selector: 'app-chart',
@@ -9,13 +11,138 @@ import * as Highcharts from 'highcharts';
 
 })
 export class DashboardComponent {
+  items: any[] = [];
+  startDate: Date = new Date();
+  endDate: Date = new Date();
+  weekCounts: any;
+  monthCounts: any;
+  dados: string[] = [];
+  urlAtualiza: string = 'https://uj88w4ga9i.execute-api.sa-east-1.amazonaws.com/dev12';
+  urlConsulta: string = 'https://4i6nb2mb07.execute-api.sa-east-1.amazonaws.com/dev13';
+  query: string = 'Pipeline_Inbound';
 
-  dataInicial: Date = new Date();
-  dataFinal: Date = new Date();
-
-  constructor() {
+  constructor(private dynamoDBService: ApiService) {
 
   }
+
+  ngOnInit() {
+
+
+    this.getItemsFromDynamoDB();
+
+  }
+
+  getItemsFromDynamoDB(): void {
+    const filtro = 'all';
+    this.dynamoDBService.getItems(this.query, this.urlConsulta, filtro).subscribe(
+      (response: any) => {
+        if (response.statusCode === 200) {
+          try {
+            const items = JSON.parse(response.body);
+            if (Array.isArray(items)) {
+              this.items = items.map(item => ({ ...item, checked: false }));
+              // Adiciona a chave 'checked' a cada item, com valor inicial como false
+              // Forçar detecção de alterações após atualizar os dados
+            } else {
+              console.error('Invalid items data:', items);
+            }
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+          }
+        } else {
+          console.error('Invalid response:', response);
+        }
+      },
+      (error: any) => {
+        console.error(error);
+      }
+    );
+  }
+
+  getMonthInterval(startDate: Date, endDate: Date): number {
+    const startYear = startDate.getFullYear();
+    const startMonth = startDate.getMonth();
+    const endYear = endDate.getFullYear();
+    const endMonth = endDate.getMonth();
+
+    return (endYear - startYear) * 12 + (endMonth - startMonth);
+  }
+
+  createChart() {
+    const startDate = new Date(this.startDate);
+    const endDate = new Date(this.endDate);
+    let intervalo = this.getMonthInterval(startDate, endDate);
+    let labels: string[] = [];
+    let dados: string[] = [];
+    let intervalos: number[] = [10, 20, 30];
+
+    if (intervalo < 1) {
+      // Intervalo inferior a 1 mês (por semana)
+      labels = this.getWeekLabels(startDate, endDate);
+      dados = labels.map((weekLabel: string) => {
+        const weekNumber = parseInt(weekLabel.split(' ')[1]);
+        return this.weekCounts[weekNumber] || 0;
+      });
+    } else {
+      // Intervalo superior a 1 mês (por mês)
+      labels = this.getMonthLabels(startDate, endDate);
+      dados = labels.map((monthLabel: string) => {
+        return this.monthCounts[monthLabel] || 0;
+      });
+    }
+
+    this.updateChart();
+  }
+
+  getWeekLabels(startDate: Date, endDate: Date): string[] {
+    const labels: string[] = [];
+
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const weekNumber = getISOWeek(currentDate);
+      const weekLabel = `Semana ${weekNumber}`;
+      labels.push(weekLabel);
+
+      // Incrementa a data em uma semana
+      currentDate.setDate(currentDate.getDate() + 7);
+    }
+
+    return labels;
+  }
+
+  getMonthLabels(startDate: Date, endDate: Date): string[] {
+    const labels: string[] = [];
+
+    // Obter o ano e mês de início
+    let year = startDate.getFullYear();
+    let month = startDate.getMonth();
+
+    // Iterar pelos meses até chegar à data de término
+    while (year < endDate.getFullYear() || (year === endDate.getFullYear() && month <= endDate.getMonth())) {
+      const monthLabel = `${this.getMonthName(month)} ${year}`;
+      labels.push(monthLabel);
+
+      // Incrementar para o próximo mês
+      month++;
+      if (month > 11) {
+        month = 0;
+        year++;
+      }
+    }
+
+    return labels;
+  }
+
+  getMonthName(monthIndex: number): string {
+    const monthNames: string[] = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    return monthNames[monthIndex];
+  }
+
+
 
 
 
@@ -26,14 +153,14 @@ export class DashboardComponent {
       width: 900
     },
     title: {
-      text: 'Percentual de Containers Reutilizados vs Importação'
+      text: 'Number of Reused and Damage Containers'
     },
     xAxis: {
-      categories: ['Total de Importação', 'Containers Reutilizados', 'Containers Avariados']
+      categories: ['Total Exported', 'Total Reused', 'Total Damaged']
     },
     yAxis: {
       title: {
-        text: 'Percentual (%)'
+        text: 'Scale of Containers'
       }
     },
     legend: {
@@ -43,10 +170,66 @@ export class DashboardComponent {
       {
         type: 'bar',
         name: 'Percentual',
-        data: [80, 20, 5] // Substitua os valores com seus dados reais
+        data: [] // Deixe os dados vazios inicialmente
       }
     ]
   };
+
+  updateChart() {
+    const startDate = this.startDate;
+    const endDate = this.endDate;
+    const testdata = new Date(startDate);
+
+    const atas = this.items.map(item => item.ATA);
+
+
+    const itemsInRange = this.items
+      .filter(item => new Date(item.ATA) >= new Date(startDate) && new Date(item.ATA) <= new Date(endDate))
+      .map(item => item.Step);
+
+    const itemsAvariados = this.items
+      .filter(item => new Date(item.ATA) >= new Date(startDate) && new Date(item.ATA) <= new Date(endDate))
+      .map(item => item.avariado);
+
+    const countReusedItems = itemsInRange.filter(item => item === 'Reused').length;
+    const countEmptyItems = itemsInRange.filter(item => item === 'Empty Return').length;
+    const countAvariados = itemsAvariados.filter(item => item === true).length;
+    const totalItens = countReusedItems + countEmptyItems
+
+    const intervalo = [totalItens, countReusedItems, countAvariados]
+
+
+
+    const percentReuse = (countReusedItems / totalItens * 100).toFixed(1);
+    const percentRDamage = (countAvariados / totalItens * 100).toFixed(1);
+
+
+
+    // Verifique se a propriedade chartOptionsReutiliza é undefined
+    if (this.chartOptionsReutiliza === undefined) {
+      this.chartOptionsReutiliza = {} as Highcharts.Options;
+    }
+
+    // Atualize os dados do gráfico
+    if (this.chartOptionsReutiliza.series === undefined) {
+      this.chartOptionsReutiliza.series = [];
+    }
+    this.chartOptionsReutiliza.series[0] = {
+      type: 'bar',
+      name: 'Percentual',
+      data: intervalo
+    };
+
+    this.chartOptionsReutiliza.series[0].data = [
+      { y: totalItens, dataLabels: { enabled: true, align: 'center', inside: true, format: '{y}' } },
+      { y: countReusedItems, dataLabels: { enabled: true, align: 'center', inside: true, format: '{y}  Reused   (' + percentReuse + '%)' } },
+      { y: countAvariados, dataLabels: { enabled: true, align: 'center', inside: true, format: '{y}  Damaged   (' + percentRDamage + '%)' } }
+    ];
+
+    // Redesenha o gráfico
+    Highcharts.chart('chartContainer', this.chartOptionsReutiliza);
+  }
+
 
 
   lineChartOptionsCustos: Highcharts.Options = {
@@ -59,7 +242,7 @@ export class DashboardComponent {
       text: 'Comparação de Orçamento e Realizado'
     },
     xAxis: {
-      categories: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+      categories: this.dados,
     },
     yAxis: {
       title: {
@@ -288,7 +471,7 @@ export class DashboardComponent {
     ]
   };
 
-  buscarIntervalo(){
+  buscarIntervalo() {
 
   }
 }

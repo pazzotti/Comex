@@ -34,6 +34,7 @@ import { HighchartsChartModule } from 'highcharts-angular';
 
 
 
+
 @NgModule({
   declarations: [
     AppComponent,

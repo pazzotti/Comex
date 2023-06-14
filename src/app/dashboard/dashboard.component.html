@@ -3,11 +3,13 @@
     <div>
       <div>
         <form>
-          <label for="filtroDataInicio">Start date:</label>
-          <input type="date" id="filtroDataInicio" name="filtroDataInicio" [(ngModel)]="dataInicial">
-          <label for="filtroDataTermino">End date:</label>
-          <input type="date" id="filtroDataTermino" name="filtroDataTermino" [(ngModel)]="dataFinal">
-          <button type="button" (click)="buscarIntervalo()">Search</button>
+          <label for="startDate">Start Date:</label>
+          <input type="date" id="startDate" [(ngModel)]="startDate" name="startDate">
+
+          <label for="endDate">End Date:</label>
+          <input type="date" id="endDate" [(ngModel)]="endDate" name="endDate">
+
+          <button (click)="updateChart()">Create Chart</button>
         </form>
       </div>
       <table>
@@ -33,7 +35,7 @@
             </div>
           </th>
           <th>
-            <div class="chart chart-pie">
+            <div class="chart chart-pie" id="chartContainer">
               <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptionsReutiliza"
                 style="height: 400px;"></highcharts-chart>
             </div>
