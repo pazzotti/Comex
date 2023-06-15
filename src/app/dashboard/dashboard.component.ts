@@ -20,6 +20,7 @@ export class DashboardComponent {
   urlAtualiza: string = 'https://uj88w4ga9i.execute-api.sa-east-1.amazonaws.com/dev12';
   urlConsulta: string = 'https://4i6nb2mb07.execute-api.sa-east-1.amazonaws.com/dev13';
   query: string = 'Pipeline_Inbound';
+  date: Date = new Date();
 
   constructor(private dynamoDBService: ApiService) {
 
@@ -182,24 +183,103 @@ export class DashboardComponent {
 
     const atas = this.items.map(item => item.ATA);
 
+    const placesSet = new Set(this.items.map(item => item.ClearancePlace));
+    const places = Array.from(placesSet);
+
+
+
+    const itemsLocal = this.items
+      .filter(item => {
+        const parts = item.ATA.split('/');
+        const day = parseInt(parts[0], 10); // Converter o dia para um número inteiro
+        const month = parseInt(parts[1], 10) - 1; // Converter o mês para um número inteiro (subtraindo 1 para ajustar à base zero)
+        const year = parseInt(parts[2], 10); // Converter o ano para um número inteiro
+
+        const date = new Date(year, month, day); // Criar o objeto Date com os valores do dia, mês e ano
+
+        return date >= new Date(startDate) && date <= new Date(endDate);
+      })
+      .map(item => item.ClearancePlace);
+
+
+    const itemCounts: { [item: string]: number } = {};
+
+    itemsLocal.forEach(item => {
+      if (itemCounts[item]) {
+        itemCounts[item]++;
+      } else {
+        itemCounts[item] = 1;
+      }
+    });
+
+
+
+    // Verifique se a propriedade xAxis existe e é um objeto antes de atualizar as categorias
+    if (this.barQuantidadeContainers.xAxis && typeof this.barQuantidadeContainers.xAxis === 'object') {
+      const xAxisOptions = this.barQuantidadeContainers.xAxis as Highcharts.XAxisOptions;
+      xAxisOptions.categories = Object.keys(itemCounts);
+
+      // Crie um novo objeto de série com os valores atualizados
+      const updatedSeries: Highcharts.SeriesOptionsType = {
+        type: 'bar',
+        name: 'Quantidade de Containers',
+        data: Object.values(itemCounts),
+        dataLabels: {
+          enabled: true,
+          inside: true,
+          align: 'center',
+          verticalAlign: 'middle',
+          style: {
+            fontWeight: 'bold'
+          }
+        }
+      };
+
+      // Atualize o objeto de série existente no gráfico
+      this.barQuantidadeContainers.series = [updatedSeries];
+
+      // Redesenhe o gráfico para refletir as mudanças
+      Highcharts.chart('chartQuantidade', this.barQuantidadeContainers);
+    }
+
+
+
+
+
 
     const itemsInRange = this.items
-      .filter(item => new Date(item.ATA) >= new Date(startDate) && new Date(item.ATA) <= new Date(endDate))
+      .filter(item => {
+        const parts = item.ATA.split('/');
+        const day = parseInt(parts[0], 10); // Converter o dia para um número inteiro
+        const month = parseInt(parts[1], 10) - 1; // Converter o mês para um número inteiro (subtraindo 1 para ajustar à base zero)
+        const year = parseInt(parts[2], 10); // Converter o ano para um número inteiro
+
+        const date = new Date(year, month, day); // Criar o objeto Date com os valores do dia, mês e ano
+
+        return date >= new Date(startDate) && date <= new Date(endDate);
+      })
       .map(item => item.Step);
 
-    const itemsAvariados = this.items
-      .filter(item => new Date(item.ATA) >= new Date(startDate) && new Date(item.ATA) <= new Date(endDate))
+      const itemsAvariados = this.items
+      .filter(item => {
+        const parts = item.ATA.split('/');
+        const day = parseInt(parts[0], 10); // Converter o dia para um número inteiro
+        const month = parseInt(parts[1], 10) - 1; // Converter o mês para um número inteiro (subtraindo 1 para ajustar à base zero)
+        const year = parseInt(parts[2], 10); // Converter o ano para um número inteiro
+
+        const date = new Date(year, month, day); // Criar o objeto Date com os valores do dia, mês e ano
+
+        return date >= new Date(startDate) && date <= new Date(endDate);
+      })
       .map(item => item.avariado);
+
+
 
     const countReusedItems = itemsInRange.filter(item => item === 'Reused').length;
     const countEmptyItems = itemsInRange.filter(item => item === 'Empty Return').length;
     const countAvariados = itemsAvariados.filter(item => item === true).length;
     const totalItens = countReusedItems + countEmptyItems
-
     const intervalo = [totalItens, countReusedItems, countAvariados]
-
-
-
     const percentReuse = (countReusedItems / totalItens * 100).toFixed(1);
     const percentRDamage = (countAvariados / totalItens * 100).toFixed(1);
 
@@ -228,6 +308,7 @@ export class DashboardComponent {
 
     // Redesenha o gráfico
     Highcharts.chart('chartContainer', this.chartOptionsReutiliza);
+
   }
 
 
@@ -455,7 +536,7 @@ export class DashboardComponent {
       text: 'Quantidade de Containers por Local'
     },
     xAxis: {
-      categories: ['CRGEA', 'SSZ', 'BTP']
+      categories: []
     },
     yAxis: {
       title: {
@@ -466,7 +547,7 @@ export class DashboardComponent {
       {
         type: 'bar',
         name: 'Quantidade de Containers',
-        data: [120, 180, 150], // Substitua os valores com seus dados reais
+        data: [], // Substitua os valores com seus dados reais
       }
     ]
   };

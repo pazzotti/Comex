@@ -35,6 +35,7 @@
     "material-icons": "^1.13.6",
     "ngx-bootstrap": "^10.2.0",
     "ngx-papaparse": "^7.0.0",
+    "ngx-progressbar": "^11.0.0",
     "node-fetch": "^3.3.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

@@ -43,6 +43,7 @@ export class AtualizarComponent {
   estadia: string = "";
   valorFree: string = '';
   liner: string = "";
+  vessel: string = "";
   custoestadia: number = 0;
 
 
@@ -203,7 +204,9 @@ inflateData(rawData: any[]): any[] {
       'FreeTime': this.Freetime,
       'TripCost': this.custoViagem,
       'Handling': this.manuseio,
-      'Demurrage': this.custoestadia
+      'Demurrage': this.custoestadia,
+      'Vessel': item['Vessel']
+
       // Adicione mais campos conforme necessário
     };
 

@@ -33,7 +33,8 @@ export class CarregaService {
         'Transp. Type': Transport,
         'Invoice Number': Invoice,
         'SLine': Liner,
-        'ATA': ATA
+        'ATA': ATA,
+        'Vessel Name/Flight (SLine)': Vessel
         // Continuar com os ajustes para as demais propriedades
       } = row;
 
@@ -53,7 +54,8 @@ export class CarregaService {
           Transport,
           Invoice,
           Liner,
-          ATA
+          ATA,
+          Vessel
           // Continuar com as demais propriedades que deseja extrair
         });
       }
@@ -98,7 +100,7 @@ export class CarregaService {
     }
 
     // Verificar se o cabeçalho está correto
-    const cabecalhoEsperado = ['Process', 'Container Id', 'Channel', 'Clearance Place', 'Step', 'Transp. Type', 'Invoice Number', 'SLine', 'ATA'];
+    const cabecalhoEsperado = ['Process', 'Container Id', 'Channel', 'Clearance Place', 'Step', 'Transp. Type', 'Invoice Number', 'SLine', 'ATA','Vessel Name/Flight (SLine)'];
     if (!cabecalho || !this.arrayEquals(cabecalho, cabecalhoEsperado)) {
       return false;
     }

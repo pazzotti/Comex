@@ -16,7 +16,7 @@
         <table>
           <tr>
             <td colspan="12">Total Freight Cost: {{ SomaTrip | currency:'USD':'symbol':'1.2-2' }}</td>
-            <td colspan="12">Total Handling Cost: {{ SomaHandling | currency:'BRL':'symbol':'1.2-2' }}</td>
+            <td colspan="12">Total THC Cost: {{ SomaHandling | currency:'BRL':'symbol':'1.2-2' }}</td>
             <td colspan="12">Total Demurrage Cost: {{ somaDemurrage | currency:'USD':'symbol':'1.2-2' }}</td>
             <td colspan="12">Total Period Cost: {{ somaDemurrage + SomaTrip |
               currency:'USD':'symbol':'1.2-2' }} + {{SomaHandling| currency:'BRL':'symbol':'1.2-2'}}</td>
@@ -36,6 +36,9 @@
               </th>
               <th>
                 <button (click)="sortBy('Process')">Process</button>
+              </th>
+              <th>
+                <button (click)="sortBy('Vessel')">Vessel</button>
               </th>
               <th>
                 <button (click)="sortBy2('Invoice')">Invoice</button>
@@ -68,7 +71,7 @@
                 <button (click)="sortBy2('TripCost')">Trip Cost</button>
               </th>
               <th>
-                <button (click)="sortBy2('Handling')">Handling</button>
+                <button (click)="sortBy2('Handling')">THC</button>
               </th>
               <th>
                 <button (click)="sortBy2('Demurrage')">Demurrage</button>
@@ -81,6 +84,7 @@
                 <input type="checkbox" [(ngModel)]="item.checked" (change)="toggleCheckedStatus(f, item)">
               </td>
               <td>{{ item.Process }}</td>
+              <td>{{ item.Vessel }}</td>
               <td>{{ item.Invoice }}</td>
               <td>{{ item.Container }}</td>
               <td [ngClass]="{

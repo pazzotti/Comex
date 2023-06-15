@@ -8,12 +8,18 @@
     <table class="table table-dark">
 
       <tr>
+        <td><label>Carrier</label></td>
         <td><label>Return Place</label></td>
         <td><label>Damaged?</label></td>
       </tr>
       <tr>
         <td>
-
+          <select formControlName="Carrier" class="select-input">
+            <option value="">Carrier</option>
+            <option *ngFor="let carrier of carriers" [value]="carrier">{{ carrier }}</option>
+          </select>
+        </td>
+        <td>
           <select formControlName="SelectedPlace" class="select-input">
             <option value="">Select one place</option>
             <option *ngFor="let place of places" [value]="place">{{ place }}</option>

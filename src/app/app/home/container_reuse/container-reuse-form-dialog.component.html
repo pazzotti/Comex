@@ -8,12 +8,19 @@
     <table class="table table-dark">
 
       <tr>
+        <td><label>Carrier</label></td>
         <td><label>Origem Place</label></td>
         <td><label>Destiny Place</label></td>
         <td><label>Booking Number</label></td>
         <td><label>Date Open Gate</label></td>
       </tr>
       <tr>
+        <td>
+          <select formControlName="Carrier" class="select-input">
+            <option value="">Select Carrier</option>
+            <option *ngFor="let carrier of carriers" [value]="carrier">{{ carrier }}</option>
+          </select>
+        </td>
         <td>
           <select formControlName="placeOrigin" class="select-input">
             <option value="">Select origin place</option>

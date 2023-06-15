@@ -233,24 +233,32 @@ export class TelaUserComponent implements OnInit {
 
   filterItems() {
     const searchText = this.searchText.toLowerCase();
-    this.calculateTotalDemurrage()
+    this.calculateTotalDemurrage();
     this.itemsFiltrados = this.items.filter(item => {
+      const process = item.Process ? item.Process.toLowerCase() : '';
+      const invoice = item.Invoice ? item.Invoice.toLowerCase() : '';
+      const container = item.Container ? item.Container.toLowerCase() : '';
+      const step = item.Step ? item.Step.toLowerCase() : '';
+      const vessel = item.Vessel ? item.Vessel.toLowerCase() : '';
+      const liner = item.Liner ? item.Liner.toLowerCase() : '';
+      const channel = item.Channel ? item.Channel.toLowerCase() : '';
 
       // Implemente a lógica de filtragem com base no seu HTML
       // Por exemplo, se seus itens tiverem uma propriedade 'Process':
-      return item.Process.toLowerCase().includes(searchText)
-        || item.Invoice.toLowerCase().includes(searchText)
-        || item.Container.toLowerCase().includes(searchText)
-        || item.Step.toLowerCase().includes(searchText)
-        || item.Liner.toLowerCase().includes(searchText)
-        || item.Channel.toLowerCase().includes(searchText)
-        || item.ATA.toLowerCase().includes(searchText)
+      return process.includes(searchText)
+        || invoice.includes(searchText)
+        || container.includes(searchText)
+        || step.includes(searchText)
+        || vessel.includes(searchText)
+        || liner.includes(searchText)
+        || channel.includes(searchText);
     });
   }
 
   onSearchTextChanged() {
     this.searchTextSubject.next(this.searchText);
   }
+
 
 }
 

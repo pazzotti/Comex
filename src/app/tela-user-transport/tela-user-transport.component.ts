@@ -79,7 +79,7 @@ export class TelaUserComponentTransport implements OnInit {
       query: table
     },
     height: '350px',
-    minWidth: '450px',
+    minWidth: '750px',
     position: {
       top: '10vh',
       left: '30vw'
