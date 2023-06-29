@@ -157,33 +157,35 @@ export class ContainerReuseFormDialogComponent {
 
   salvar() {
 
-    const finalDate = this.formatarData(new Date());
+    if (this.formReuse.valid) {
+      const finalDate = this.formatarData(new Date());
 
-    this.data.itemsData = {
-      ...this.data.itemsData, // Mantém os valores existentes
-      "placeOrigin": this.formReuse.get('placeOrigin')?.value,
-      "placedestiny": this.formReuse.get('place')?.value,
-      "gateOpen": this.data.itemsData.gateOpen,
-      "booking": this.data.itemsData.booking,
-      "Carrier":this.formReuse.get('Carrier')?.value,
-      "finalDate": finalDate,
-      "Step": 'Reused'
-    };
+      this.data.itemsData = {
+        ...this.data.itemsData, // Mantém os valores existentes
+        "placeOrigin": this.formReuse.get('placeOrigin')?.value,
+        "placedestiny": this.formReuse.get('place')?.value,
+        "gateOpen": this.data.itemsData.gateOpen,
+        "booking": this.data.itemsData.booking,
+        "Carrier": this.formReuse.get('Carrier')?.value,
+        "finalDate": finalDate,
+        "Step": 'Reused'
+      };
 
-    this.data.itemsData.tableName = this.query2
-    const itemsDataString = JSON.stringify(this.data.itemsData); // Acessa a string desejada
-    const modifiedString = itemsDataString.replace(/\\"/g, '"'); // Realiza a substituição na string
-    const jsonObject = JSON.parse(modifiedString) as { [key: string]: string };
-    const modifiedJsonString = JSON.stringify(jsonObject);
-    const jsonObject2 = JSON.parse(modifiedJsonString) as { tableName: string, ID: string, acao: string };
-    const jsonArray = [jsonObject2];
-    this.dynamoDBService.salvar(jsonArray, this.query2, this.urlAtualiza).subscribe(response => {
-    }, error => {
-      console.log(error);
-    });
-    this.dialogRef.close('resultado do diálogo');
+      this.data.itemsData.tableName = this.query2
+      const itemsDataString = JSON.stringify(this.data.itemsData); // Acessa a string desejada
+      const modifiedString = itemsDataString.replace(/\\"/g, '"'); // Realiza a substituição na string
+      const jsonObject = JSON.parse(modifiedString) as { [key: string]: string };
+      const modifiedJsonString = JSON.stringify(jsonObject);
+      const jsonObject2 = JSON.parse(modifiedJsonString) as { tableName: string, ID: string, acao: string };
+      const jsonArray = [jsonObject2];
+      this.dynamoDBService.salvar(jsonArray, this.query2, this.urlAtualiza).subscribe(response => {
+      }, error => {
+        console.log(error);
+      });
+      this.dialogRef.close('resultado do diálogo');
 
 
+    }
 
   }
 

@@ -18,12 +18,14 @@
             <option value="">Carrier</option>
             <option *ngFor="let carrier of carriers" [value]="carrier">{{ carrier }}</option>
           </select>
+          <div *ngIf="formGroup.get('Carrier')?.errors?.['required']" class="error-message">Carrier is required</div>
         </td>
         <td>
           <select formControlName="SelectedPlace" class="select-input">
             <option value="">Select one place</option>
             <option *ngFor="let place of places" [value]="place">{{ place }}</option>
           </select>
+          <div *ngIf="formGroup.get('SelectedPlace')?.errors?.['required']" class="error-message">Place is required</div>
         </td>
         <input type="checkbox" formControlName="Checkbox" class="checkbox-input">
 

@@ -20,23 +20,28 @@
             <option value="">Select Carrier</option>
             <option *ngFor="let carrier of carriers" [value]="carrier">{{ carrier }}</option>
           </select>
+          <div *ngIf="formReuse.get('Carrier')?.errors?.['required']" class="error-message">Carrier is required</div>
         </td>
         <td>
           <select formControlName="placeOrigin" class="select-input">
             <option value="">Select origin place</option>
             <option *ngFor="let placeOrigin of placesOrigin" [value]="placeOrigin">{{ placeOrigin }}</option>
           </select>
+          <div *ngIf="formReuse.get('placeOrigin')?.errors?.['required']" class="error-message">Place is required</div>
         </td>
         <td>
           <select formControlName="place" class="select-input">
             <option value="">Select destiny place</option>
             <option *ngFor="let place of places" [value]="place">{{ place }}</option>
           </select>
+          <div *ngIf="formReuse.get('place')?.errors?.['required']" class="error-message">Place is required</div>
         </td>
         <td>
           <input type="string" name="booking" formControlName="booking" [(ngModel)]="data.itemsData.booking">
+          <div *ngIf="formReuse.get('booking')?.errors?.['required']" class="error-message">Booking is required</div>
         </td>
         <td><input type="date" name="gateOpen" formControlName="gateOpen" [(ngModel)]="data.itemsData.gateOpen"></td>
+        <div *ngIf="formReuse.get('gateOpen')?.errors?.['required']" class="error-message">Date is required</div>
       </tr>
 
 

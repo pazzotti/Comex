@@ -533,20 +533,20 @@ export class DashboardComponent {
       width: 900
     },
     title: {
-      text: 'Quantidade de Containers por Local'
+      text: 'Clearance Place'
     },
     xAxis: {
       categories: []
     },
     yAxis: {
       title: {
-        text: 'Quantidade'
+        text: 'Quantity'
       }
     },
     series: [
       {
         type: 'bar',
-        name: 'Quantidade de Containers',
+        name: 'Clearance Place',
         data: [], // Substitua os valores com seus dados reais
       }
     ]

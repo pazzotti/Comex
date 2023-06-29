@@ -56,6 +56,20 @@ export class TelaUserComponent implements OnInit {
 
   }
 
+  sortByDate2(date: string): number {
+    const parts = date.split('/');
+    const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    return new Date(formattedDate).getTime();
+  }
+
+  sortItemsByATA(): void {
+    this.itemsFiltrados.sort((a, b) => {
+      const dateA = this.sortByDate2(a.ATA);
+      const dateB = this.sortByDate2(b.ATA);
+      return dateB - dateA;
+    });
+  }
+
   selecionarItem(item: any): void {
     // Define o estado de checked apenas para o item selecionado
     item.checked = true;
@@ -132,7 +146,10 @@ export class TelaUserComponent implements OnInit {
             const items = JSON.parse(response.body);
             if (Array.isArray(items)) {
               this.items = items.map(item => ({ ...item, checked: false }));
+              this.itemsFiltrados = this.items; // Movido para dentro do bloco subscribe
               // Adiciona a chave 'checked' a cada item, com valor inicial como false
+              // Ordena os itens por ATA
+              this.sortItemsByATA();
             } else {
               console.error('Invalid items data:', items);
             }

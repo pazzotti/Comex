@@ -36,11 +36,12 @@ export class TelaUserComponentTransport implements OnInit {
   constructor(private dynamoDBService: ApiService, public dialog: MatDialog) { }
 
   ngOnInit() {
+
     this.searchTextSubscription = this.searchTextSubject.pipe(debounceTime(300)).subscribe(() => {
       this.filterItems();
     });
     this.getItemsFromDynamoDB();
-    this.calcularSomaDemurrage();
+
   }
 
 
@@ -111,22 +112,6 @@ export class TelaUserComponentTransport implements OnInit {
     return `${ano}-${mes}-${dia}`;
   }
 
-  aplicarFiltroPorData(): void {
-    if (this.filtroDataInicio && this.filtroDataTermino) {
-      const filtroInicio = new Date(this.filtroDataInicio);
-      const filtroTermino = new Date(this.filtroDataTermino);
-
-      this.itemsFiltrados = this.items.filter(item => {
-        const dataFormatada = this.converterData(item.ATA);
-        const dataItem = new Date(dataFormatada);
-
-        return dataItem >= filtroInicio && dataItem <= filtroTermino;
-      });
-    } else {
-      this.itemsFiltrados = this.items;
-    }
-  }
-
   calcularSomaTrip(): number {
     return this.itemsFiltrados.reduce((sum, item) => sum + Number(item.TripCost), 0);
   }
@@ -145,8 +130,9 @@ export class TelaUserComponentTransport implements OnInit {
           try {
             const items = JSON.parse(response.body);
             if (Array.isArray(items)) {
-              this.items = items.map(item => ({ ...item, checked: false }));
+              this.items = items.map(item => ({ ...item}));
               // Adiciona a chave 'checked' a cada item, com valor inicial como false
+              this.itemsFiltrados = this.items; // Movido para dentro do bloco subscribe
             } else {
               console.error('Invalid items data:', items);
             }
@@ -162,6 +148,7 @@ export class TelaUserComponentTransport implements OnInit {
       }
     );
   }
+
 
 
 
@@ -250,21 +237,23 @@ export class TelaUserComponentTransport implements OnInit {
   filterItems() {
     const searchText = this.searchText.toLowerCase();
     this.itemsFiltrados = this.items.filter(item => {
+      const process = item.Process ? item.Process.toLowerCase() : '';
+      const invoice = item.Invoice ? item.Invoice.toLowerCase() : '';
+      const container = item.Container ? item.Container.toLowerCase() : '';
+      const step = item.Step ? item.Step.toLowerCase() : '';
+      const vessel = item.Vessel ? item.Vessel.toLowerCase() : '';
+      const liner = item.Liner ? item.Liner.toLowerCase() : '';
+      const channel = item.Channel ? item.Channel.toLowerCase() : '';
 
       // Implemente a lógica de filtragem com base no seu HTML
       // Por exemplo, se seus itens tiverem uma propriedade 'Process':
-      return item.Process.toLowerCase().includes(searchText)
-        || item.Invoice.toLowerCase().includes(searchText)
-        || item.Container.toLowerCase().includes(searchText)
-        || item.Step.toLowerCase().includes(searchText)
-        || item.Liner.toLowerCase().includes(searchText)
-        || item.Channel.toLowerCase().includes(searchText)
-        || item.ATA.toLowerCase().includes(searchText)
-        || item.Dias.toLowerCase().includes(searchText)
-        || item.FreeTime.toLowerCase().includes(searchText)
-        || item.TripCost.toLowerCase().includes(searchText)
-        || item.Handling.toLowerCase().includes(searchText)
-        || item.Demurrage.toLowerCase().includes(searchText);
+      return process.includes(searchText)
+        || invoice.includes(searchText)
+        || container.includes(searchText)
+        || step.includes(searchText)
+        || vessel.includes(searchText)
+        || liner.includes(searchText)
+        || channel.includes(searchText);
     });
   }
 

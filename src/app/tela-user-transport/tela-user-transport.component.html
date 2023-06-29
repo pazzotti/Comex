@@ -2,8 +2,14 @@
   <ul>
     <div>
       <div *ngIf="dataLoaded">
+        <form>
+          <label for="filtroDataInicio">Search items:</label>
+          <input type="text" name="searchText" [(ngModel)]="searchText" (input)="filterItems()" placeholder="Find" >
 
-        <p>Total lines {{ items.length }}</p>
+
+        </form>
+
+        <p>Total lines {{ itemsFiltrados.length }}</p>
         <table>
           <thead>
             <tr>
@@ -35,7 +41,7 @@
                 <button (click)="sortBy2('FreeTime')">Freetime</button>
               </th>
               <th>
-                <button (click)="sortBy2('TripCost')">Trip Cost</button>
+                <button (click)="sortBy2('TripCost')">Freight cost + BAF</button>
               </th>
               <th>
                 <button (click)="sortBy2('Handling')">Handling</button>
@@ -48,7 +54,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of items">
+            <tr *ngFor="let item of itemsFiltrados">
               <td>{{ item.Process }}</td>
               <td>{{ item.Invoice }}</td>
               <td>{{ item.Container }}</td>
