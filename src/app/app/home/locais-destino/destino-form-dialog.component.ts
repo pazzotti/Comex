@@ -36,7 +36,7 @@ export class DestinoFormDialogComponent {
       const formattedDate = format(currentDate, 'ddMMyyyyHHmmss');
       console.log(formattedDate);
 
-      this.data.itemsData = {"ID" : formattedDate.toString(),"contato":this.data.itemsData.contato,"endereco":this.data.itemsData.endereco,"local":this.data.itemsData.local }
+      this.data.itemsData = {"ID" : formattedDate.toString(),"contato":this.data.itemsData.contato,"endereco":this.data.itemsData.endereco,"local":this.data.itemsData.local, "distancia":this.data.itemsData.distancia }
 
 
     }

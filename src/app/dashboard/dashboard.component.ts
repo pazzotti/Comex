@@ -16,6 +16,7 @@ export class DashboardComponent {
   items: any[] = [];
   itemsHandling: number = 0;
   itemsDemurrage: number = 0;
+  itemsPeso: number = 0;
   itemsFreight: number = 0;
   startDate: Date = new Date();
   endDate: Date = new Date();
@@ -32,39 +33,10 @@ export class DashboardComponent {
   }
 
   ngOnInit() {
-
-
-
-
-    this.endDate = new Date(); // Data atual
-    this.endDate.setDate(this.endDate.getDate() - 30); // Subtrai 30 dias
-
-
-
-
     this.endDate = new Date();
-    let year = this.endDate.getFullYear();
-    let month = String(this.endDate.getMonth() + 1).padStart(2, '0');
-    let day = String(this.endDate.getDate()).padStart(2, '0');
-
-    let formattedDate = `${year}-${month}-${day}`; // Formato "YYYY-MM-DD"
-
-    this.endDate = new Date(formattedDate);
-
-
-
     this.startDate.setDate(this.startDate.getDate() - 30);
-
-    year = this.startDate.getFullYear();
-    month = String(this.startDate.getMonth() + 1).padStart(2, '0');
-    day = String(this.startDate.getDate()).padStart(2, '0');
-
-    formattedDate = `${year}-${month}-${day}`; // Formato "YYYY-MM-DD"
-
-    this.startDate = new Date(formattedDate);
-
-     // Chama as funções com um atraso de 1 segundo (1000 milissegundos)
-     setTimeout(() => {
+    // Chama as funções com um atraso de 1 segundo (1000 milissegundos)
+    setTimeout(() => {
       this.getItemsFromDynamoDB();
       setTimeout(() => {
         this.updateChart();
@@ -184,38 +156,6 @@ export class DashboardComponent {
     return monthNames[monthIndex];
   }
 
-
-  chartOptionsCO2: Highcharts.Options = {
-    chart: {
-      type: 'line',
-      backgroundColor: 'rgba(242, 242, 242, 0.5)',
-      width: 900
-    },
-    title: {
-      text: 'CO2 Emissions Monitoring'
-    },
-    xAxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    },
-    yAxis: {
-      title: {
-        text: 'CO2 Emissions (tons)'
-      }
-    },
-    legend: {
-      enabled: false
-    },
-    series: [
-      {
-        type: 'line', // Adicione a propriedade type
-        name: 'CO2 Emissions',
-        data: [100, 120, 150, 110, 130, 140, 160, 155, 170, 180, 200, 190]
-      }
-    ]
-  };
-
-
-
   chartOptionsReutiliza: Highcharts.Options = {
     chart: {
       type: 'bar',
@@ -226,7 +166,7 @@ export class DashboardComponent {
       text: 'Number of Reused and Damage Containers'
     },
     xAxis: {
-      categories: ['Total Exported', 'Total Reused', 'Total Damaged']
+      categories: ['Total Imported', 'Total Reused', 'Total Damaged']
     },
     yAxis: {
       title: {
@@ -245,9 +185,51 @@ export class DashboardComponent {
     ]
   };
 
+  chartOptionsCO2: Highcharts.Options = {
+    chart: {
+      type: 'line',
+      backgroundColor: 'rgba(242, 242, 242, 0.5)',
+      width: 900
+    },
+    title: {
+      text: 'CO2 Emissions Monitoring'
+    },
+    xAxis: {
+      categories: []
+    },
+    yAxis: {
+      title: {
+        text: 'CO2 Emissions (Kg/tons)'
+      }
+    },
+    legend: {
+      enabled: false
+    },
+    series: [
+      {
+        type: 'line',
+        name: 'CO2 Emissions',
+        data: [100, 120, 150, 110, 130, 140, 160, 155, 170, 180, 200, 190]
+      },
+      {
+        type: 'line',
+        name: 'Target',
+        data: [],
+        color: 'red',
+        dashStyle: 'Dash',
+        marker: {
+          enabled: false
+        }
+      }
+    ]
+  };
+
+
+
   updateChart() {
     const startDate = new Date(this.startDate);
     const endDate = new Date(this.endDate);
+
 
     const itemsLocal = this.items.filter(item => {
       const parts = item.ATA.split('/');
@@ -270,6 +252,9 @@ export class DashboardComponent {
     });
 
 
+
+
+
     // Verifique se a propriedade xAxis existe e é um objeto antes de atualizar as categorias
     if (this.barQuantidadeContainers.xAxis && typeof this.barQuantidadeContainers.xAxis === 'object') {
       const xAxisOptions = this.barQuantidadeContainers.xAxis as Highcharts.XAxisOptions;
@@ -278,7 +263,7 @@ export class DashboardComponent {
       // Crie um novo objeto de série com os valores atualizados
       const updatedSeries: Highcharts.SeriesOptionsType = {
         type: 'bar',
-        name: 'Quantidade de Containers',
+        name: 'Quantity of Containers',
         data: Object.values(itemCounts),
         dataLabels: {
           enabled: true,
@@ -298,7 +283,171 @@ export class DashboardComponent {
       Highcharts.chart('chartQuantidade', this.barQuantidadeContainers);
     }
 
+    if (this.chartOptionsCO2 && this.chartOptionsCO2.xAxis && typeof this.chartOptionsCO2.xAxis === 'object') {
+      const startDate = new Date(this.startDate);
+      const endDate = new Date(this.endDate);
 
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const categories = [];
+
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        categories.push(new Date(currentDate));
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+
+      const xAxisOptions = this.chartOptionsCO2.xAxis as Highcharts.XAxisOptions;
+      xAxisOptions.categories = categories.map(date => {
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        return `${month} ${year}`;
+      });
+
+
+
+
+      const pesoByMonth: { [month: string]: number } = {};
+
+      const currentDate2 = new Date(startDate);
+
+      while (currentDate2 <= endDate) {
+        const month = currentDate2.getMonth() + 1;
+        const year = currentDate2.getFullYear();
+        const key: string = `${month}-${year}`;
+        pesoByMonth[key] = 0;
+        currentDate2.setMonth(currentDate2.getMonth() + 1);
+      }
+
+      this.items.forEach(item => {
+        const parts = item.ATA.split('/');
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        const year = parseInt(parts[2], 10);
+        const date = new Date(year, month - 1, day); // Subtraia 1 do mês para ajustar à base zero
+
+        if (date >= startDate && date <= endDate) {
+          if (item.Peso) {
+            const peso = parseFloat(item.Peso.replace(',', '.')); // Substitua ',' por '.' caso esteja usando ',' como separador decimal
+            if (!isNaN(peso) && peso > 0) {
+              const key = `${month}-${year}`;
+              if (pesoByMonth.hasOwnProperty(key)) {
+                pesoByMonth[key] += peso;
+              } else {
+                pesoByMonth[key] = peso;
+              }
+            }
+          }
+        }
+      });
+
+      const pesoTotal = Object.values(pesoByMonth).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+      console.log(pesoByMonth);
+      console.log(pesoTotal);
+
+
+
+
+      const countByMonth: { [month: string]: number } = {};
+
+      this.items.forEach(item => {
+        const parts = item.ATA.split('/');
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        const year = parseInt(parts[2], 10);
+        const date = new Date(year, month - 1, day);
+
+        if (date >= startDate && date <= endDate) {
+          if (item.Peso) {
+            const peso = parseFloat(item.Peso.replace(',', '.'));
+
+            if (!isNaN(peso) && peso > 0) {
+              const key = `${month}-${year}`;
+              if (countByMonth.hasOwnProperty(key)) {
+                countByMonth[key] += 1; // Incrementa a contagem para o mês atual
+              } else {
+                countByMonth[key] = 1; // Inicializa a contagem para o mês atual
+              }
+            }
+          }
+        }
+      });
+
+      console.log(countByMonth);
+      const kco2: { [month: string]: number } = {};
+
+      for (const key in countByMonth) {
+        if (countByMonth.hasOwnProperty(key) && pesoByMonth.hasOwnProperty(key)) {
+          const count = countByMonth[key];
+          const peso = pesoByMonth[key];
+
+          const kco2Value = (count * 64 * 2.7) / (peso / 1000);
+          kco2[key] = kco2Value;
+        }
+      }
+
+      console.log(kco2);
+
+      const kco2Result: number[] = Array.from({ length: 12 }, (_, index) => {
+        const key = `${index + 1}-2023`;
+        return kco2[key] || 0;
+      });
+
+      console.log(kco2Result);
+
+
+      // Atualize os dados do gráfico com base no intervalo de datas
+      const data = Array.from({ length: 12 }, (_, i) => {
+        const key = `${i + 1}-${startDate.getFullYear()}`;
+        return pesoByMonth.hasOwnProperty(key) ? pesoByMonth[key] : 0;
+      });
+
+
+
+
+      // Calcule os dados correspondentes ao intervalo de datas selecionado
+      const startIndex = startDate.getMonth();
+      const endIndex = endDate.getMonth();
+      const updatedData = kco2Result.slice(startIndex, endIndex + 1);
+
+      // Crie um novo objeto de série com os valores atualizados
+      const updatedSeries: Highcharts.SeriesOptionsType = {
+        type: 'line',
+        name: 'CO2 Emissions',
+        data: updatedData
+      };
+
+      if (this.chartOptionsCO2.series && this.chartOptionsCO2.series.length > 0) {
+        this.chartOptionsCO2.series[0] = updatedSeries;
+      } else {
+        this.chartOptionsCO2.series = [updatedSeries];
+      }
+
+      // Atualize os dados da série "Target" com base no intervalo de datas
+
+      const targetData = Array(endIndex - startIndex + 1).fill(13);
+      if (this.chartOptionsCO2.series && this.chartOptionsCO2.series.length > 1) {
+        const targetSeries = this.chartOptionsCO2.series[1] as Highcharts.SeriesLineOptions;
+        targetSeries.data = targetData;
+      } else {
+        const targetSeries: Highcharts.SeriesLineOptions = {
+          type: 'line',
+          name: 'Target',
+          data: targetData,
+          color: 'red',
+          dashStyle: 'Dash',
+          marker: {
+            enabled: false
+          }
+        };
+        this.chartOptionsCO2.series.push(targetSeries);
+      }
+
+
+
+      // Redesenhe o gráfico para refletir as mudanças
+      Highcharts.chart('chartContainerCO2', this.chartOptionsCO2);
+    }
 
 
 

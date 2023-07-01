@@ -11,6 +11,7 @@
           <th>Place</th>
           <th>e-mail</th>
           <th>Address</th>
+          <th>Distance (Km)</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -19,6 +20,7 @@
           <td>{{ item.local }}</td>
           <td>{{ item.contato }}</td>
           <td>{{ item.endereco }}</td>
+          <td>{{ item.distancia }}</td>
           <td> <!-- adicionando os botões de ação -->
             <button mat-icon-button color="primary" aria-label="Editar" (click)="editDialog(item, urlConsulta, query)">
               <a>edit</a>
