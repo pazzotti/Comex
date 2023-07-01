@@ -139,3 +139,8 @@ div {
     margin-left: 10px;
     /* Outras propriedades de margem ou preenchimento conforme necessário */
   }
+  .progress-bar {
+    width: 40%; /* Ajuste a largura conforme necessário */
+    height: 25px;
+    background-color: rgb(230, 75, 196); /* Altere para a cor desejada */
+  }

@@ -13,9 +13,6 @@ import { Observable } from 'rxjs';
   selector: 'atualizar-root',
   templateUrl: './atualizar.component.html',
   styleUrls: ['./atualizar.component.css'],
-  template: `
-    <progressbar [value]="progressValue" [max]="100">{{ progressValue }}%</progressbar>
-  `
 })
 export class AtualizarComponent {
   progressValue = 0; // Valor atual da barra de progresso
@@ -73,6 +70,13 @@ export class AtualizarComponent {
 
   }
 
+  getProgressWidth(): string {
+    const totalItems = this.jsonData.length;
+    const processedItems = this.progressValue;
+    const progressPercentage = (processedItems / totalItems) * 100;
+    return `${progressPercentage}%`;
+  }
+
 
   salvarNoBanco() {
     this.showProgressBar = true;
@@ -108,7 +112,7 @@ export class AtualizarComponent {
 
     setTimeout(() => {
       this.showProgressBar = false;
-    }, 7000); // Defina o tempo adequado conforme necessário
+    }, 2000); // Defina o tempo adequado conforme necessário
   }
 
 
@@ -205,7 +209,12 @@ inflateData(rawData: any[]): any[] {
       'TripCost': this.custoViagem,
       'Handling': this.manuseio,
       'Demurrage': this.custoestadia,
-      'Vessel': item['Vessel']
+      'Vessel': item['Vessel'],
+      'Value':item['Value'],
+      'Expense':item['Expense'],
+      'Volume':item['Volume'],
+      'Peso':item['Peso'],
+      'Chegada': item['Chegada']
 
       // Adicione mais campos conforme necessário
     };

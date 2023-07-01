@@ -30,6 +30,7 @@ import { DevolverVazioFormDialogComponent } from './app/home/devolver_vazio/devo
 import { ContainerReuseFormDialogComponent } from './app/home/container_reuse/container-reuse-form-dialog.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { HighchartsChartModule } from 'highcharts-angular';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 
 
@@ -71,6 +72,7 @@ import { HighchartsChartModule } from 'highcharts-angular';
     HttpClientModule,
     FormsModule,
     HighchartsChartModule,
+    MatProgressBarModule,
     MatDialogModule,
     BrowserAnimationsModule,
     BrowserAnimationsModule,

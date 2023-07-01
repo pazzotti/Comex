@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import * as Highcharts from 'highcharts';
 import { getISOWeek } from 'date-fns';
 import { ApiService } from '../services/contratos/contratos.service';
+import HC_exporting from 'highcharts/modules/exporting';
+HC_exporting(Highcharts);
 
 @Component({
   selector: 'app-chart',
@@ -12,6 +14,9 @@ import { ApiService } from '../services/contratos/contratos.service';
 })
 export class DashboardComponent {
   items: any[] = [];
+  itemsHandling: number = 0;
+  itemsDemurrage: number = 0;
+  itemsFreight: number = 0;
   startDate: Date = new Date();
   endDate: Date = new Date();
   weekCounts: any;
@@ -29,7 +34,43 @@ export class DashboardComponent {
   ngOnInit() {
 
 
-    this.getItemsFromDynamoDB();
+
+
+    this.endDate = new Date(); // Data atual
+    this.endDate.setDate(this.endDate.getDate() - 30); // Subtrai 30 dias
+
+
+
+
+    this.endDate = new Date();
+    let year = this.endDate.getFullYear();
+    let month = String(this.endDate.getMonth() + 1).padStart(2, '0');
+    let day = String(this.endDate.getDate()).padStart(2, '0');
+
+    let formattedDate = `${year}-${month}-${day}`; // Formato "YYYY-MM-DD"
+
+    this.endDate = new Date(formattedDate);
+
+
+
+    this.startDate.setDate(this.startDate.getDate() - 30);
+
+    year = this.startDate.getFullYear();
+    month = String(this.startDate.getMonth() + 1).padStart(2, '0');
+    day = String(this.startDate.getDate()).padStart(2, '0');
+
+    formattedDate = `${year}-${month}-${day}`; // Formato "YYYY-MM-DD"
+
+    this.startDate = new Date(formattedDate);
+
+     // Chama as funções com um atraso de 1 segundo (1000 milissegundos)
+     setTimeout(() => {
+      this.getItemsFromDynamoDB();
+      setTimeout(() => {
+        this.updateChart();
+      }, 2000);
+    }, 100);
+
 
   }
 
@@ -144,6 +185,34 @@ export class DashboardComponent {
   }
 
 
+  chartOptionsCO2: Highcharts.Options = {
+    chart: {
+      type: 'line',
+      backgroundColor: 'rgba(242, 242, 242, 0.5)',
+      width: 900
+    },
+    title: {
+      text: 'CO2 Emissions Monitoring'
+    },
+    xAxis: {
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    },
+    yAxis: {
+      title: {
+        text: 'CO2 Emissions (tons)'
+      }
+    },
+    legend: {
+      enabled: false
+    },
+    series: [
+      {
+        type: 'line', // Adicione a propriedade type
+        name: 'CO2 Emissions',
+        data: [100, 120, 150, 110, 130, 140, 160, 155, 170, 180, 200, 190]
+      }
+    ]
+  };
 
 
 
@@ -177,30 +246,18 @@ export class DashboardComponent {
   };
 
   updateChart() {
-    const startDate = this.startDate;
-    const endDate = this.endDate;
-    const testdata = new Date(startDate);
+    const startDate = new Date(this.startDate);
+    const endDate = new Date(this.endDate);
 
-    const atas = this.items.map(item => item.ATA);
+    const itemsLocal = this.items.filter(item => {
+      const parts = item.ATA.split('/');
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+      const date = new Date(year, month, day);
 
-    const placesSet = new Set(this.items.map(item => item.ClearancePlace));
-    const places = Array.from(placesSet);
-
-
-
-    const itemsLocal = this.items
-      .filter(item => {
-        const parts = item.ATA.split('/');
-        const day = parseInt(parts[0], 10); // Converter o dia para um número inteiro
-        const month = parseInt(parts[1], 10) - 1; // Converter o mês para um número inteiro (subtraindo 1 para ajustar à base zero)
-        const year = parseInt(parts[2], 10); // Converter o ano para um número inteiro
-
-        const date = new Date(year, month, day); // Criar o objeto Date com os valores do dia, mês e ano
-
-        return date >= new Date(startDate) && date <= new Date(endDate);
-      })
-      .map(item => item.ClearancePlace);
-
+      return date >= startDate && date <= endDate;
+    }).map(item => item.ClearancePlace);
 
     const itemCounts: { [item: string]: number } = {};
 
@@ -211,7 +268,6 @@ export class DashboardComponent {
         itemCounts[item] = 1;
       }
     });
-
 
 
     // Verifique se a propriedade xAxis existe e é um objeto antes de atualizar as categorias
@@ -246,6 +302,52 @@ export class DashboardComponent {
 
 
 
+    this.itemsDemurrage = this.items
+      .filter(item => {
+        const parts = item.ATA.split('/');
+        const day = parseInt(parts[0], 10); // Converter o dia para um número inteiro
+        const month = parseInt(parts[1], 10) - 1; // Converter o mês para um número inteiro (subtraindo 1 para ajustar à base zero)
+        const year = parseInt(parts[2], 10); // Converter o ano para um número inteiro
+
+        const date = new Date(year, month, day); // Criar o objeto Date com os valores do dia, mês e ano
+
+        return date >= new Date(startDate) && date <= new Date(endDate);
+      })
+      .map(item => item.Demurrage)
+      .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+    this.itemsFreight = this.items
+      .filter(item => {
+        const parts = item.ATA.split('/');
+        const day = parseInt(parts[0], 10); // Converter o dia para um número inteiro
+        const month = parseInt(parts[1], 10) - 1; // Converter o mês para um número inteiro (subtraindo 1 para ajustar à base zero)
+        const year = parseInt(parts[2], 10); // Converter o ano para um número inteiro
+
+        const date = new Date(year, month, day); // Criar o objeto Date com os valores do dia, mês e ano
+
+        return date >= new Date(startDate) && date <= new Date(endDate);
+      })
+      .map(item => item.TripCost)
+      .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+    this.itemsHandling = this.items
+      .filter(item => {
+        const parts = item.ATA.split('/');
+        const day = parseInt(parts[0], 10); // Converter o dia para um número inteiro
+        const month = parseInt(parts[1], 10) - 1; // Converter o mês para um número inteiro (subtraindo 1 para ajustar à base zero)
+        const year = parseInt(parts[2], 10); // Converter o ano para um número inteiro
+
+        const date = new Date(year, month, day); // Criar o objeto Date com os valores do dia, mês e ano
+
+        return date >= new Date(startDate) && date <= new Date(endDate);
+      })
+      .map(item => item.Handling)
+      .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+    console.log(this.itemsHandling);
+
+
+
 
     const itemsInRange = this.items
       .filter(item => {
@@ -260,7 +362,7 @@ export class DashboardComponent {
       })
       .map(item => item.Step);
 
-      const itemsAvariados = this.items
+    const itemsAvariados = this.items
       .filter(item => {
         const parts = item.ATA.split('/');
         const day = parseInt(parts[0], 10); // Converter o dia para um número inteiro
@@ -306,8 +408,64 @@ export class DashboardComponent {
       { y: countAvariados, dataLabels: { enabled: true, align: 'center', inside: true, format: '{y}  Damaged   (' + percentRDamage + '%)' } }
     ];
 
+
     // Redesenha o gráfico
     Highcharts.chart('chartContainer', this.chartOptionsReutiliza);
+
+    // Verifique se a propriedade pieChartOptions é undefined
+    if (this.pieChartOptions === undefined) {
+      this.pieChartOptions = {} as Highcharts.Options;
+    }
+
+    // Atualize os dados do gráfico
+    if (this.pieChartOptions.series === undefined) {
+      this.pieChartOptions.series = [];
+    }
+    this.pieChartOptions.series[0] = {
+      type: 'pie',
+      name: 'Share',
+      data: [
+        {
+          y: this.itemsDemurrage,
+          dataLabels: {
+            format: '<b>Demurrage:</b> US$ {point.y:,.2f}'
+          }
+        },
+        {
+          y: this.itemsHandling,
+          dataLabels: {
+            format: '<b>THC:</b> R$ {point.y:,.2f}'
+          }
+        },
+        {
+          y: this.itemsFreight,
+          dataLabels: {
+            format: '<b>Freight:</b> US$ {point.y:,.2f}'
+          }
+        }
+      ]
+    };
+
+    this.pieChartOptions.plotOptions = {
+      pie: {
+        innerSize: '30%',
+        allowPointSelect: true,
+        cursor: 'pointer',
+        dataLabels: {
+          enabled: true,
+          distance: -30,
+          style: {
+            fontWeight: 'bold',
+            color: 'white'
+          }
+        }
+      }
+    };
+
+
+
+    // Redesenha o gráfico
+    Highcharts.chart('pieChartOptions', this.pieChartOptions);
 
   }
 
@@ -349,6 +507,7 @@ export class DashboardComponent {
       }
     ]
   };
+
   Highcharts: typeof Highcharts = Highcharts;
   columnChartOptions: Highcharts.Options = {
     chart: {
@@ -386,83 +545,6 @@ export class DashboardComponent {
     ]
   };
 
-  pieChartOptionsCustos: Highcharts.Options = {
-    chart: {
-      width: 900,
-      backgroundColor: 'rgba(242, 242, 242, 0.5)',
-      type: 'pie'
-    },
-    title: {
-      text: 'Share of Container Costs'
-    },
-    plotOptions: {
-      pie: {
-        innerSize: '30%',
-        allowPointSelect: true,
-        cursor: 'pointer',
-        dataLabels: {
-          enabled: true,
-          format: '{point.percentage:.1f}%',
-          distance: -30,
-          style: {
-            fontWeight: 'bold',
-            color: 'white'
-          }
-        }
-      }
-    },
-    series: [
-      {
-        type: 'pie',
-        name: 'Share',
-        data: [
-          { name: 'Frete', y: 100 },
-          { name: 'Manuseio', y: 200 },
-          { name: 'Clean', y: 150 },
-          { name: 'Transport', y: 300 },
-          { name: 'Storage', y: 250 },
-          { name: 'Demurrage', y: 175 }
-        ],
-        dataLabels: {
-          enabled: true,
-          format: '{point.percentage:.1f}%',
-          distance: -30,
-          style: {
-            fontWeight: 'bold',
-            color: 'white'
-          }
-        }
-      },
-      {
-        type: 'pie',
-        name: 'Values',
-        innerSize: '60%',
-        data: [
-          { name: 'Frete', y: 100 },
-          { name: 'Manuseio', y: 200 },
-          { name: 'Clean', y: 150 },
-          { name: 'Transport', y: 300 },
-          { name: 'Storage', y: 250 },
-          { name: 'Demurrage', y: 175 }
-        ],
-        dataLabels: {
-          enabled: true,
-          format: '<b>{point.name}</b>: {point.y}',
-          distance: 30,
-          style: {
-            fontWeight: 'bold'
-          }
-        }
-      }
-    ],
-    legend: {
-      align: 'right',
-      verticalAlign: 'middle',
-      layout: 'vertical',
-      itemMarginTop: 10,
-      itemMarginBottom: 10
-    }
-  };
   pieChartOptions: Highcharts.Options = {
     chart: {
       width: 900,
@@ -479,52 +561,23 @@ export class DashboardComponent {
         cursor: 'pointer',
         dataLabels: {
           enabled: true,
-          format: '<b>{point.name}</b>: {point.y}'
+          format: '<b>{point.name}</b>: {point.percentage:.1f}%'
         }
       }
     },
     series: [
       {
         type: 'pie',
-        name: 'Sales',
+        name: 'Cost Share',
         data: [
-          { name: 'Product A', y: 2100 },
-          { name: 'Product B', y: 2500 }
+          { name: 'Demurrage', y: this.itemsDemurrage },
+          { name: 'Handling', y: this.itemsHandling },
+          { name: 'Freight', y: this.itemsFreight }
         ]
       }
     ]
   };
-  pieChart2Options: Highcharts.Options = {
-    chart: {
-      width: 900,
-      backgroundColor: 'rgba(242, 242, 242, 0.5)',
-      type: 'pie'
-    },
-    title: {
-      text: 'Share of Container Costs'
-    },
-    plotOptions: {
-      pie: {
-        innerSize: '30%',
-        allowPointSelect: true,
-        cursor: 'pointer',
-        dataLabels: {
-          enabled: true,
-          format: '<b>{point.name}</b>: {point.y}'
-        }
-      }
-    },
-    series: [
-      {
-        type: 'pie',
-        name: 'Sales',
-        data: [
-          { name: 'Product A', y: 2100 },
-          { name: 'Product B', y: 2500 }
-        ]
-      }
-    ]
-  };
+
 
   barQuantidadeContainers: Highcharts.Options = {
     chart: {

@@ -16,13 +16,15 @@ export class CarregaService {
   }
 
 
-  processData(fileContent: string): any[] {
+  processData(fileContent: string): Array<any> {
     const parsedData = this.papa.parse(fileContent, {
       header: true,
       delimiter: ';'
     }).data;
-    const result = [];
-    const seen = new Set();
+    const containerVolumes: Record<string, number> = {};
+    const containerWeights: Record<string, number> = {};
+    const result: Array<any> = [];
+
     for (const row of parsedData) {
       const {
         'Process': Process,
@@ -34,17 +36,52 @@ export class CarregaService {
         'Invoice Number': Invoice,
         'SLine': Liner,
         'ATA': ATA,
-        'Vessel Name/Flight (SLine)': Vessel
+        'Vessel Name/Flight (SLine)': Vessel,
+        'Value': Value,
+        'Expense': Expense,
+        'Packing Volume (m3)': Volume,
+        'Gross Weigth (kg)': Weight,
+        'Estimated Arrival Date': Chegada
+        // Continuar com os ajustes para as demais propriedades
+      }: {
+        'Process': string,
+        'Container Id': string,
+        ' Channel': string,
+        'Clearance Place': string,
+        'Step': string,
+        'Transp. Type': string,
+        'Invoice Number': string,
+        'SLine': string,
+        'ATA': string,
+        'Vessel Name/Flight (SLine)': string,
+        'Value': string,
+        'Expense': string,
+        'Packing Volume (m3)': string,
+        'Gross Weigth (kg)': string,
+        'Estimated Arrival Date': string
         // Continuar com os ajustes para as demais propriedades
       } = row;
 
-      if (!Container || Container.trim().length === 0 || Transport != 10 || ATA === '') {
-        continue; // pula linhas vazias e com Supplier Number vazio
+      if (!Container || Container.trim().length === 0 || Transport !== '10' || ATA === '') {
+        continue;
       }
 
-      const key = `${Container},${Process}`;
-      if (!seen.has(key)) {
-        seen.add(key);
+      const parsedVolume = parseFloat(Volume.replace(',', '.'));
+      const parsedWeight = parseFloat(Weight.replace(',', '.'));
+
+      if (containerVolumes[Container]) {
+        containerVolumes[Container] += parsedVolume;
+      } else {
+        containerVolumes[Container] = parsedVolume;
+      }
+
+      if (containerWeights[Container]) {
+        containerWeights[Container] += parsedWeight;
+      } else {
+        containerWeights[Container] = parsedWeight;
+      }
+
+      if (!result.some((item) => item.Container === Container)) {
         result.push({
           Process,
           Container,
@@ -55,14 +92,32 @@ export class CarregaService {
           Invoice,
           Liner,
           ATA,
-          Vessel
+          Vessel,
+          Value,
+          Expense,
+          Chegada,
+          // Adicionar o campo 'Volume' corretamente
+          Volume: undefined,
+          Peso: undefined
           // Continuar com as demais propriedades que deseja extrair
         });
       }
     }
 
+    for (const item of result) {
+      const Container = item.Container;
+      const Volume = containerVolumes[Container];
+      const Weight = containerWeights[Container];
+
+      item.Volume = Volume.toFixed(2);
+      item.Peso = Weight.toFixed(2);
+    }
+
     return result;
   }
+
+
+
 
   async loadFile(fileUrl: string): Promise<any[]> {
     const fileContent = await this.getFileContent(fileUrl);
@@ -99,8 +154,9 @@ export class CarregaService {
       return false;
     }
 
+
     // Verificar se o cabeçalho está correto
-    const cabecalhoEsperado = ['Process', 'Container Id', 'Channel', 'Clearance Place', 'Step', 'Transp. Type', 'Invoice Number', 'SLine', 'ATA','Vessel Name/Flight (SLine)'];
+    const cabecalhoEsperado = ['Process', 'Container Id', 'Channel', 'Clearance Place', 'Step', 'Transp. Type', 'Invoice Number', 'SLine', 'ATA','Vessel Name/Flight (SLine)','Value','Expense','Volume','Peso','Chegada'];
     if (!cabecalho || !this.arrayEquals(cabecalho, cabecalhoEsperado)) {
       return false;
     }

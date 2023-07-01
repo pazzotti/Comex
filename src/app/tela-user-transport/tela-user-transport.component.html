@@ -32,7 +32,7 @@
                 <button (click)="sortBy('Channel')">Channel</button>
               </th>
               <th>
-                <button (click)="sortByDate('ATA')">ATA</button>
+                <button (click)="sortByDate('Chegada')">Arrival</button>
               </th>
               <th>
                 <button (click)="sortBy2('Dias')">Harbor Days</button>
@@ -62,7 +62,7 @@
               <td>{{ item.Liner }}</td>
               <td [ngClass]="{ 'verde-value': item.Channel == 'VERDE','negative-value': item.Channel == 'VERMELHO'}">{{
                 item.Channel }}</td>
-              <td>{{ item.ATA }}</td>
+              <td>{{ item.Chegada }}</td>
               <td>{{ item.Dias }}</td>
               <td
                 [ngClass]="{ 'negative-value': item.FreeTime < 0 , 'danger-value': item.FreeTime < 2 && item.FreeTime >= 0 }">

@@ -15,29 +15,32 @@
       <table>
         <tr>
           <th>
-            <div class="chart chart-column" id="chartQuantidade">
+            <div class="chart-container" id="chartQuantidade">
               <highcharts-chart [Highcharts]="Highcharts" [options]="barQuantidadeContainers"
-                style="height: 400px;"></highcharts-chart>
+                style="height: 400px; width: 100%;"></highcharts-chart>
             </div>
           </th>
           <th>
-            <div class="chart chart-pie">
-              <highcharts-chart [Highcharts]="Highcharts" [options]="pieChartOptionsCustos"
-                style="height: 400px;"></highcharts-chart>
+            <div class="chart-container" id="pieChartOptions">
+              <highcharts-chart [Highcharts]="Highcharts" [options]="pieChartOptions"
+                style="height: 400px; width: 100%;"></highcharts-chart>
             </div>
           </th>
         </tr>
         <tr>
           <th>
-            <div class="chart chart-column">
-              <highcharts-chart [Highcharts]="Highcharts" [options]="lineChartOptionsCustos"
-                style="height: 400px;"></highcharts-chart>
+            <div class="chart-container" id="chartOptionsCO2">
+              <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptionsCO2"
+                style="height: 400px; width: 100%;"></highcharts-chart>
             </div>
           </th>
           <th>
-            <div class="chart chart-pie" id="chartContainer">
+            <div class="chart-container" id="chartContainer">
               <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptionsReutiliza"
-                style="height: 400px;"></highcharts-chart>
+                style="height: 400px; width: 100%;"></highcharts-chart>
+
+
+
             </div>
           </th>
         </tr>
