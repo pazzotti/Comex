@@ -51,6 +51,7 @@
               </th>
               <th>Reused</th>
               <th>Empty Return</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -75,6 +76,9 @@
               </td>
               <td>
                 <button (click)="devolverVazio(item, urlConsulta, query)">Empty Return</button>
+              </td>
+              <td>
+                <button (click)="deleteItem(item.ID)">Delete</button>
               </td>
             </tr>
           </tbody>

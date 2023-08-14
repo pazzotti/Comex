@@ -29,6 +29,7 @@ export class TelaUserComponentTransport implements OnInit {
   private searchTextSubject = new Subject<string>();
   private searchTextSubscription!: Subscription;
   urlConsulta: string = 'https://4i6nb2mb07.execute-api.sa-east-1.amazonaws.com/dev13';
+  urlAltera: string = 'https://uj88w4ga9i.execute-api.sa-east-1.amazonaws.com/dev12';
   query: string = 'Pipeline_Inbound';
   data: any;
 
@@ -231,6 +232,20 @@ export class TelaUserComponentTransport implements OnInit {
     const month = parseInt(parts[1], 10) - 1;
     const year = parseInt(parts[2], 10);
     return new Date(year, month, day);
+  }
+
+  deleteItem(ID: string): void {
+    this.dynamoDBService.deleteItem(ID, this.urlAltera, this.query).subscribe(
+      response => {
+        setTimeout(() => {
+          this.getItemsFromDynamoDB();
+        }, 400); // Ajuste o tempo de atraso conforme necessário
+      },
+      error => {
+        // Lógica para lidar com erros durante a deleção do item
+      }
+    );
+
   }
 
 
